@@ -1,15 +1,41 @@
-import { View, Text,Image,StyleSheet,useWindowDimensions,ScrollView} from 'react-native';
-import React, { useState } from 'react';
+import { View, Text,Image,StyleSheet,useWindowDimensions,ScrollView, ActivityIndicator, FlatList, SafeAreaView,useColorScheme} from 'react-native';
+import React, { useEffect, useState } from 'react';
+
 import Logo from '../../../assests/images/hellozoom.png';
 import CustomButton from '../../components/CustomButton';
 import CustomSignButton from '../../components/CustomSignButton';
 import SocialSignButtons from '../../components/SocialSignButtons/SocialSignButtons';
 
 const GetUserDetailsScreen = () => {
-    const [clientID, setClientID] = useState('');
+   const [clientID, setClientID] = useState('');
 
-    const {height} = useWindowDimensions();
+   const {height} = useWindowDimensions();
+    
+   const [isLoading, setLoading] = useState(true);
+   const [data, setData] = useState([]);
 
+   const getUserDetails = async () => {
+     try {
+      const response = await fetch('https://reactnative.dev/movies.json');
+      const json = await response.json();
+
+      setData(json.movies);
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getUserDetails();
+  }, []);
+  
+  buttonClickListener = () => {
+    alert("Clicked On Button !!!");
+  };
+  
     const onSignInPressed = () => {
         console.warn("Get User Details ");
     }
@@ -23,7 +49,7 @@ const GetUserDetailsScreen = () => {
     }
 
   return (
-      <ScrollView>
+    <ScrollView>
     
     <View style={styles.root}>
 
@@ -39,10 +65,14 @@ const GetUserDetailsScreen = () => {
 
     
     {/* Will default to Primary when type no defined */}
-    <CustomSignButton 
-    text="Get User Details Button" 
-    onPress={onSignInPressed}
-    />
+    
+    <CustomSignButton text="Get User Details Button" onPress={onSignInPressed}/>
+    
+     <View style={{ flex: 1, padding: 35 }}> 
+     {isLoading ? <ActivityIndicator/> : (
+          <FlatList data={data} keyExtractor={({ id }, index) => id} renderItem={({ item }) => (
+          <Text>{item.title}, {item.releaseYear}</Text>)}/>)}
+      </View>
 
     </View>
     </ScrollView>  
